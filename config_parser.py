@@ -10,7 +10,7 @@ import xlsxwriter
 
 #update to appropriate directory
 
-directory = '/Users/vince/Desktop/Lab'
+directory = '/Users/vince/Desktop/Lab/'
 
 #f = open(file, 'r')
 #file_contents = f.read()
@@ -31,10 +31,10 @@ interfaces = []
 general_info = {}
 new = []
 
-for file in os.listdir(directory):
-        if file.endswith('.rtf'):
+for files in os.listdir(directory):
+        if files.endswith('.rtf'):
                 #load config into parser
-                parse = CiscoConfParse(file)
+                parse = CiscoConfParse(files)
                 hostname = parse.find_lines(r'^hostname')
                 for intf in parse.find_objects(r'^interface'):
                         interfaces.append(str(intf.text))
