@@ -10,7 +10,7 @@ import xlsxwriter
 
 #update to appropriate directory
 
-directory = '/Users/vince/Desktop/Lab/'
+directory = '/Users/vince/Desktop/Lab'
 
 #f = open(file, 'r')
 #file_contents = f.read()
@@ -31,10 +31,26 @@ interfaces = []
 general_info = {}
 new = []
 
-for files in os.listdir(directory):
-        if files.endswith('.rtf'):
+def prefix_conversion(ip):
+     '''This function splits the ip and mask info passed into it
+     and returns the CIDR representation as an IPv4Network object'''
+     try:
+          ip, mask = ip.split()
+          mask = mask.replace('\\','')
+     except:
+          ip = None
+          mask = None
+     if ip and mask: 
+          prefix = ipaddress.ip_network('{}/{}'.format(ip,mask), strict=False)
+     else: 
+          prefix = 'Not Assigned'
+     return prefix
+
+
+for file in os.listdir(directory):
+        if file.endswith('.rtf'):
                 #load config into parser
-                parse = CiscoConfParse(files)
+                parse = CiscoConfParse(file)
                 hostname = parse.find_lines(r'^hostname')
                 for intf in parse.find_objects(r'^interface'):
                         interfaces.append(str(intf.text))
@@ -44,7 +60,9 @@ for files in os.listdir(directory):
                             new = i.re_sub(r'<IOSCfgLine\s\#\s\d+\s+\'\s',r'') #remove junk before description TEST
                             new = new[1:].replace('\\','')#remove space
                             #print(new, "This is new")
-                        interface_info[str(intf.text)]=(str(new),str(intf.re_match_iter_typed(IPv4_REGEX)))
+                        ip_info = str(intf.re_match_iter_typed(IPv4_REGEX))
+#                        print(ip_info)
+                        interface_info[str(intf.text)]=(str(new),str(prefix_conversion(ip_info)))
                         #print(str(intf.text))
                         new = str()
 			#ip_address = intf.re_match_iter_typed(IPv4_REGEX)
@@ -99,18 +117,7 @@ with open(outputs, 'w') as f:
                    desc = ip[0]
                    if len(desc)==0:
                        desc = "No Description"
-                   try:
-                       ip,mask = ip[-1].split()
-                       mask = mask.replace('\\','')
-                   except:
-                  # no IP assinged
-                       ip = None
-                       mask = None
-
-                   if ip and mask:
-                       prefix = ipaddress.ip_network('{}/{}'.format(ip,mask), strict=False)
-                   else:
-                       prefix = 'Not Assigned'
+                   prefix = ip[1]
                    f.write("ROUTER {}: {} : {} : address {}\n".format(myhost, clean_interface, desc, prefix))
           
                    worksheet.write(row, col, myhost)
