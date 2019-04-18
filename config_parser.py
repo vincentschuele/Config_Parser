@@ -68,7 +68,7 @@ for files in os.listdir(directory):
 #                        print(ip_info)
                         interface_info[clean_interface]=(str(desc),str(prefix_conversion(ip_info)))
                         #print(str(intf.text))
-                        new = str()
+                        desc = str()
 			#ip_address = intf.re_match_iter_typed(IPv4_REGEX)
                         #print(ip_address)
                         #description = intf.re_search_children(r"^\s+description")
